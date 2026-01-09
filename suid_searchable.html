@@ -1,1 +1,640 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My SUID Binaries Reference</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #1a1a2e;
+            color: #e6e6e6;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #30475e;
+        }
+        
+        h1 {
+            color: #4cc9f0;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #a9a9a9;
+            font-size: 1.1rem;
+        }
+        
+        .search-container {
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        #searchBox {
+            width: 100%;
+            max-width: 600px;
+            padding: 15px;
+            border: 2px solid #30475e;
+            border-radius: 8px;
+            background-color: #16213e;
+            color: #e6e6e6;
+            font-size: 1.1rem;
+            transition: border-color 0.3s;
+        }
+        
+        #searchBox:focus {
+            outline: none;
+            border-color: #4cc9f0;
+        }
+        
+        #searchBox::placeholder {
+            color: #7a7a7a;
+        }
+        
+        .results-info {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: rgba(76, 201, 240, 0.1);
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .results-info.show {
+            display: block;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #16213e;
+        }
+        
+        thead {
+            background-color: #0f3460;
+            position: sticky;
+            top: 0;
+        }
+        
+        th {
+            padding: 18px 15px;
+            text-align: left;
+            color: #4cc9f0;
+            font-weight: 600;
+            border-bottom: 2px solid #30475e;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #30475e;
+        }
+        
+        tr:hover {
+            background-color: rgba(76, 201, 240, 0.05);
+        }
+        
+        .binary-name {
+            color: #f72585;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+        }
+        
+        .binary-link {
+            color: #f72585;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: color 0.2s;
+        }
+        
+        .binary-link:hover {
+            color: #ff4da6;
+            text-decoration: underline;
+        }
+        
+        .external-icon {
+            margin-left: 5px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        .function-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .tag {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        
+        .tag:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+        
+        .tag-shell {
+            background-color: rgba(247, 37, 133, 0.2);
+            color: #f72585;
+            border: 1px solid rgba(247, 37, 133, 0.4);
+        }
+        
+        .tag-file {
+            background-color: rgba(76, 201, 240, 0.2);
+            color: #4cc9f0;
+            border: 1px solid rgba(76, 201, 240, 0.4);
+        }
+        
+        .tag-network {
+            background-color: rgba(114, 247, 89, 0.2);
+            color: #72f759;
+            border: 1px solid rgba(114, 247, 89, 0.4);
+        }
+        
+        .tag-suid {
+            background-color: rgba(255, 203, 5, 0.2);
+            color: #ffcb05;
+            border: 1px solid rgba(255, 203, 5, 0.4);
+        }
+        
+        .tag-other {
+            background-color: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+            border: 1px solid rgba(168, 85, 247, 0.4);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #a9a9a9;
+            font-size: 1.2rem;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #30475e;
+            color: #7a7a7a;
+            font-size: 0.9rem;
+        }
+        
+        .footer-links {
+            margin-top: 10px;
+        }
+        
+        .footer-links a {
+            color: #4cc9f0;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+            }
+            
+            .tag {
+                font-size: 0.75rem;
+                padding: 3px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>My SUID Binaries Reference</h1>
+            <p class="subtitle">Searchable database of binaries with SUID capabilities | Click on binary names for GTFOBins details</p>
+        </header>
+        
+        <div class="search-container">
+            <input type="text" id="searchBox" placeholder="Start typing to search for a binary by name or function...">
+        </div>
+        
+        <div id="resultsInfo" class="results-info">
+            Showing <span id="matchCount">0</span> of <span id="totalCount">0</span> binaries
+        </div>
+        
+        <div class="table-container">
+            <table id="binariesTable">
+                <thead>
+                    <tr>
+                        <th width="20%">Binary</th>
+                        <th width="80%">Functions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Table rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+            <div id="noResults" class="no-results" style="display: none;">
+                No binaries found matching your search. Try a different term.
+            </div>
+        </div>
+        
+        <footer>
+            <p>SUID Binaries Reference | Data exported from system binaries with SUID capabilities</p>
+            <div class="footer-links">
+                <a href="https://gtfobins.github.io/" target="_blank">GTFOBins Home</a>
+                <a href="https://github.com/GTFOBins/GTFOBins.github.io" target="_blank">GTFOBins GitHub</a>
+            </div>
+            <p>Click on a binary name to open its GTFOBins page | Click on a function tag to filter by that function</p>
+        </footer>
+    </div>
+
+    <script>
+        // Data for the SUID binaries
+        const binariesData = [
+            { binary: "aa-exec", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "ab", functions: ["File upload", "File download", "SUID", "Sudo"] },
+            { binary: "agetty", functions: ["SUID"] },
+            { binary: "alpine", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "ar", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "arj", functions: ["File write", "File read", "SUID", "Sudo"] },
+            { binary: "arp", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "as", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "ascii-xfr", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "ash", functions: ["Shell", "File write", "SUID", "Sudo"] },
+            { binary: "aspell", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "atobm", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "awk", functions: ["Shell", "Non-interactive reverse shell", "Non-interactive bind shell", "File write", "File read", "SUID", "Sudo", "Limited SUID"] },
+            { binary: "base32", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "base64", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "basenc", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "basez", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "bash", functions: ["Shell", "Reverse shell", "File upload", "File download", "File write", "File read", "Library load", "SUID", "Sudo"] },
+            { binary: "bc", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "bridge", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "busctl", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "busybox", functions: ["Shell", "Reverse shell", "File upload", "File write", "File read", "SUID", "Sudo"] },
+            { binary: "bzip2", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "cabal", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "capsh", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "cat", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "chmod", functions: ["SUID", "Sudo"] },
+            { binary: "choom", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "chown", functions: ["SUID", "Sudo"] },
+            { binary: "chroot", functions: ["SUID", "Sudo"] },
+            { binary: "clamscan", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "cmp", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "column", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "comm", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "cp", functions: ["File write", "File read", "SUID", "Sudo"] },
+            { binary: "cpio", functions: ["Shell", "File write", "File read", "SUID", "Sudo"] },
+            { binary: "cpulimit", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "csh", functions: ["Shell", "File write", "SUID", "Sudo"] },
+            { binary: "csplit", functions: ["File write", "File read", "SUID", "Sudo"] },
+            { binary: "csvtool", functions: ["Shell", "File write", "File read", "SUID", "Sudo"] },
+            { binary: "cupsfilter", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "curl", functions: ["File upload", "File download", "File write", "File read", "SUID", "Sudo"] },
+            { binary: "cut", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "dash", functions: ["Shell", "File write", "SUID", "Sudo"] },
+            { binary: "date", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "dd", functions: ["File write", "File read", "SUID", "Sudo"] },
+            { binary: "debugfs", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "dialog", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "diff", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "dig", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "distcc", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "dmsetup", functions: ["SUID", "Sudo"] },
+            { binary: "docker", functions: ["Shell", "File write", "File read", "SUID", "Sudo"] },
+            { binary: "dosbox", functions: ["File write", "File read", "SUID", "Sudo"] },
+            { binary: "ed", functions: ["Shell", "File write", "File read", "SUID", "Sudo", "Limited SUID"] },
+            { binary: "efax", functions: ["SUID", "Sudo"] },
+            { binary: "elvish", functions: ["Shell", "File write", "File read", "SUID", "Sudo"] },
+            { binary: "emacs", functions: ["Shell", "File write", "File read", "SUID", "Sudo"] },
+            { binary: "env", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "eqn", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "espeak", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "expand", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "expect", functions: ["Shell", "File read", "SUID", "Sudo"] },
+            { binary: "file", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "find", functions: ["Shell", "File write", "SUID", "Sudo"] },
+            { binary: "fish", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "flock", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "fmt", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "fold", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "gawk", functions: ["Shell", "Non-interactive reverse shell", "Non-interactive bind shell", "File write", "File read", "SUID", "Sudo", "Limited SUID"] },
+            { binary: "gcore", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "gdb", functions: ["Shell", "Reverse shell", "File upload", "File download", "File write", "File read", "Library load", "SUID", "Sudo", "Capabilities"] },
+            { binary: "genie", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "genisoimage", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "gimp", functions: ["Shell", "Reverse shell", "File upload", "File download", "File write", "File read", "Library load", "SUID", "Sudo"] },
+            { binary: "grep", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "gtester", functions: ["Shell", "File write", "SUID", "Sudo"] },
+            { binary: "gzip", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "hd", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "head", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "hexdump", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "highlight", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "hping3", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "iconv", functions: ["File write", "File read", "SUID", "Sudo"] },
+            { binary: "install", functions: ["SUID", "Sudo"] },
+            { binary: "ionice", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "ip", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "ispell", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "jjs", functions: ["Shell", "Reverse shell", "File download", "File write", "File read", "SUID", "Sudo"] },
+            { binary: "join", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "jq", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "jrunscript", functions: ["Shell", "Reverse shell", "File download", "File write", "File read", "SUID", "Sudo"] },
+            { binary: "julia", functions: ["Shell", "Reverse shell", "File download", "File write", "File read", "SUID", "Sudo"] },
+            { binary: "ksh", functions: ["Shell", "Reverse shell", "File upload", "File download", "File write", "File read", "SUID", "Sudo"] },
+            { binary: "ksshell", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "kubectl", functions: ["File upload", "SUID", "Sudo"] },
+            { binary: "ld.so", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "less", functions: ["Shell", "File write", "File read", "SUID", "Sudo"] },
+            { binary: "links", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "logsave", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "look", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "lua", functions: ["Shell", "Non-interactive reverse shell", "Non-interactive bind shell", "File upload", "File download", "File write", "File read", "SUID", "Sudo", "Limited SUID"] },
+            { binary: "make", functions: ["Shell", "File write", "SUID", "Sudo"] },
+            { binary: "mawk", functions: ["Shell", "File write", "File read", "SUID", "Sudo", "Limited SUID"] },
+            { binary: "minicom", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "more", functions: ["Shell", "File read", "SUID", "Sudo"] },
+            { binary: "mosquitto", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "msgattrib", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "msgcat", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "msgconv", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "msgfilter", functions: ["Shell", "File read", "SUID", "Sudo"] },
+            { binary: "msgmerge", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "msguniq", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "multitime", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "mv", functions: ["SUID", "Sudo"] },
+            { binary: "nasm", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "nawk", functions: ["Shell", "Non-interactive reverse shell", "Non-interactive bind shell", "File write", "File read", "SUID", "Sudo", "Limited SUID"] },
+            { binary: "ncftp", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "nft", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "nice", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "nl", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "nm", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "nmap", functions: ["Shell", "Non-interactive reverse shell", "Non-interactive bind shell", "File upload", "File download", "File write", "File read", "SUID", "Sudo", "Limited SUID"] },
+            { binary: "node", functions: ["Shell", "Reverse shell", "Bind shell", "File upload", "File download", "File write", "File read", "SUID", "Sudo", "Capabilities"] },
+            { binary: "nohup", functions: ["Shell", "Command", "SUID", "Sudo"] },
+            { binary: "ntpdate", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "od", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "openssl", functions: ["Reverse shell", "File upload", "File download", "File write", "File read", "Library load", "SUID", "Sudo"] },
+            { binary: "openvpn", functions: ["Shell", "File read", "SUID", "Sudo"] },
+            { binary: "pandoc", functions: ["Shell", "File write", "File read", "SUID", "Sudo", "Limited SUID"] },
+            { binary: "paste", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "perf", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "perl", functions: ["Shell", "Reverse shell", "File read", "SUID", "Sudo", "Capabilities"] },
+            { binary: "pexec", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "pg", functions: ["Shell", "File read", "SUID", "Sudo"] },
+            { binary: "php", functions: ["Shell", "Command", "Reverse shell", "File upload", "File download", "File write", "File read", "SUID", "Sudo", "Capabilities"] },
+            { binary: "pidstat", functions: ["Command", "SUID", "Sudo"] },
+            { binary: "pr", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "ptx", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "python", functions: ["Shell", "Reverse shell", "File upload", "File download", "File write", "File read", "Library load", "SUID", "Sudo", "Capabilities"] },
+            { binary: "rc", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "readelf", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "restic", functions: ["File upload", "SUID", "Sudo"] },
+            { binary: "rev", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "rlwrap", functions: ["Shell", "File write", "SUID", "Sudo"] },
+            { binary: "rsync", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "rtorrent", functions: ["Shell", "SUID"] },
+            { binary: "run-parts", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "rview", functions: ["Shell", "Reverse shell", "Non-interactive reverse shell", "Non-interactive bind shell", "File upload", "File download", "File write", "File read", "Library load", "SUID", "Sudo", "Capabilities", "Limited SUID"] },
+            { binary: "rvim", functions: ["Shell", "Reverse shell", "Non-interactive reverse shell", "Non-interactive bind shell", "File upload", "File download", "File write", "File read", "Library load", "SUID", "Sudo", "Capabilities", "Limited SUID"] },
+            { binary: "sash", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "scanmem", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "sed", functions: ["Shell", "Command", "File write", "File read", "SUID", "Sudo"] },
+            { binary: "setarch", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "setfacl", functions: ["SUID", "Sudo"] },
+            { binary: "setlock", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "shuf", functions: ["File write", "File read", "SUID", "Sudo"] },
+            { binary: "soelim", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "softlimit", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "sort", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "sqlite3", functions: ["Shell", "File write", "File read", "SUID", "Sudo", "Limited SUID"] },
+            { binary: "ss", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "ssh-agent", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "ssh-keygen", functions: ["Library load", "SUID", "Sudo"] },
+            { binary: "ssh-keyscan", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "sshpass", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "start-stop-daemon", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "stdbuf", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "strace", functions: ["Shell", "File write", "SUID", "Sudo"] },
+            { binary: "strings", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "sysctl", functions: ["Command", "File read", "SUID", "Sudo"] },
+            { binary: "systemctl", functions: ["SUID", "Sudo"] },
+            { binary: "tac", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "tail", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "taskset", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "tbl", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "tclsh", functions: ["Shell", "Non-interactive reverse shell", "SUID", "Sudo"] },
+            { binary: "tee", functions: ["File write", "SUID", "Sudo"] },
+            { binary: "terraform", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "tftp", functions: ["File upload", "File download", "SUID", "Sudo"] },
+            { binary: "tic", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "time", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "timeout", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "troff", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "ul", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "unexpand", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "uniq", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "unshare", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "unsquashfs", functions: ["SUID", "Sudo"] },
+            { binary: "unzip", functions: ["SUID", "Sudo"] },
+            { binary: "update-alternatives", functions: ["SUID", "Sudo"] },
+            { binary: "uudecode", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "uuencode", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "vagrant", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "varnishncsa", functions: ["SUID", "Sudo"] },
+            { binary: "view", functions: ["Shell", "Reverse shell", "Non-interactive reverse shell", "Non-interactive bind shell", "File upload", "File download", "File write", "File read", "Library load", "SUID", "Sudo", "Capabilities", "Limited SUID"] },
+            { binary: "vigr", functions: ["SUID", "Sudo"] },
+            { binary: "vim", functions: ["Shell", "Reverse shell", "Non-interactive reverse shell", "Non-interactive bind shell", "File upload", "File download", "File write", "File read", "Library load", "SUID", "Sudo", "Capabilities", "Limited SUID"] },
+            { binary: "vimdiff", functions: ["Shell", "Reverse shell", "Non-interactive reverse shell", "Non-interactive bind shell", "File upload", "File download", "File write", "File read", "Library load", "SUID", "Sudo", "Capabilities", "Limited SUID"] },
+            { binary: "vipw", functions: ["SUID", "Sudo"] },
+            { binary: "w3m", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "watch", functions: ["Shell", "SUID", "Sudo", "Limited SUID"] },
+            { binary: "wc", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "wget", functions: ["Shell", "File upload", "File download", "File write", "File read", "SUID", "Sudo"] },
+            { binary: "whiptail", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "xargs", functions: ["Shell", "File read", "SUID", "Sudo"] },
+            { binary: "xdotool", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "xmodmap", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "xmore", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "xxd", functions: ["File write", "File read", "SUID", "Sudo"] },
+            { binary: "xz", functions: ["File read", "SUID", "Sudo"] },
+            { binary: "yash", functions: ["Shell", "SUID", "Sudo"] },
+            { binary: "zsh", functions: ["Shell", "File write", "File read", "SUID", "Sudo"] },
+            { binary: "zsoelim", functions: ["File read", "SUID", "Sudo"] }
+        ];
+
+        // Function to generate GTFOBins URL for a binary
+        function getGTFOBinsURL(binaryName) {
+            // Handle special cases for binary names with dots or slashes
+            const encodedBinary = encodeURIComponent(binaryName);
+            return `https://gtfobins.github.io/gtfobins/${encodedBinary}/#suid`;
+        }
+
+        // Function to categorize tags for styling
+        function getTagClass(func) {
+            if (func.toLowerCase().includes('shell')) return 'tag-shell';
+            if (func.toLowerCase().includes('file')) return 'tag-file';
+            if (func.toLowerCase().includes('reverse') || func.toLowerCase().includes('bind') || 
+                func.toLowerCase().includes('upload') || func.toLowerCase().includes('download') ||
+                func.toLowerCase().includes('network')) return 'tag-network';
+            if (func.toLowerCase().includes('suid') || func.toLowerCase().includes('sudo') || 
+                func.toLowerCase().includes('capabilit')) return 'tag-suid';
+            return 'tag-other';
+        }
+
+        // Function to render the table
+        function renderTable(data) {
+            const tableBody = document.getElementById('tableBody');
+            const noResults = document.getElementById('noResults');
+            const resultsInfo = document.getElementById('resultsInfo');
+            const matchCount = document.getElementById('matchCount');
+            const totalCount = document.getElementById('totalCount');
+            
+            tableBody.innerHTML = '';
+            
+            if (data.length === 0) {
+                noResults.style.display = 'block';
+                resultsInfo.classList.remove('show');
+            } else {
+                noResults.style.display = 'none';
+                resultsInfo.classList.add('show');
+                matchCount.textContent = data.length;
+                totalCount.textContent = binariesData.length;
+                
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    
+                    // Binary name cell with GTFOBins link
+                    const binaryCell = document.createElement('td');
+                    const binaryLink = document.createElement('a');
+                    binaryLink.href = getGTFOBinsURL(item.binary);
+                    binaryLink.target = '_blank';
+                    binaryLink.className = 'binary-link';
+                    binaryLink.innerHTML = `${item.binary} <span class="external-icon">↗</span>`;
+                    binaryLink.title = `Open ${item.binary} GTFOBins page`;
+                    
+                    const binaryContainer = document.createElement('div');
+                    binaryContainer.className = 'binary-name';
+                    binaryContainer.appendChild(binaryLink);
+                    binaryCell.appendChild(binaryContainer);
+                    
+                    // Functions cell
+                    const functionsCell = document.createElement('td');
+                    const functionsContainer = document.createElement('div');
+                    functionsContainer.className = 'function-tags';
+                    
+                    item.functions.forEach(func => {
+                        const tag = document.createElement('span');
+                        tag.className = `tag ${getTagClass(func)}`;
+                        tag.textContent = func;
+                        tag.title = `Search for binaries with: ${func}`;
+                        // Add click event to search by tag
+                        tag.addEventListener('click', () => {
+                            document.getElementById('searchBox').value = func;
+                            filterTable();
+                        });
+                        functionsContainer.appendChild(tag);
+                    });
+                    
+                    functionsCell.appendChild(functionsContainer);
+                    
+                    row.appendChild(binaryCell);
+                    row.appendChild(functionsCell);
+                    tableBody.appendChild(row);
+                });
+            }
+        }
+
+        // Function to filter the table based on search input
+        function filterTable() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            
+            if (searchTerm === '') {
+                renderTable(binariesData);
+                return;
+            }
+            
+            const filteredData = binariesData.filter(item => {
+                // Check binary name
+                if (item.binary.toLowerCase().includes(searchTerm)) {
+                    return true;
+                }
+                
+                // Check functions
+                for (const func of item.functions) {
+                    if (func.toLowerCase().includes(searchTerm)) {
+                        return true;
+                    }
+                }
+                
+                return false;
+            });
+            
+            renderTable(filteredData);
+        }
+
+        // Initialize the table on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTable(binariesData);
+            
+            // Add event listener to search box
+            const searchBox = document.getElementById('searchBox');
+            searchBox.addEventListener('input', filterTable);
+            
+            // Add focus to search box for immediate typing
+            searchBox.focus();
+            
+            // Add keyboard shortcut for clearing search (Ctrl/Cmd + K)
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    searchBox.value = '';
+                    filterTable();
+                    searchBox.focus();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
